@@ -17,16 +17,13 @@ local onion_enabled = ui.new_checkbox("LUA", "B", "Enabled")
 local onion_antirecharge_enabled = ui.new_checkbox("LUA", "B", "Disable Recharge in Region")
 local onion_debug_lines = ui.new_checkbox("LUA", "B", "Debug Lines")
 local onion_draw_distance = ui.new_slider("LUA", "B", "Draw Distance", 5, 5000, 250)
-local onion_draw_color_enabled = ui.new_checkbox("LUA", "B", "Draw Color")
-local onion_draw_color = ui.new_color_picker("LUA", "B", "Draw Color", 3, 136, 252, 100)
-local onion_draw_insidecolor_enabled = ui.new_checkbox("LUA", "B", "Hover Color")
-local onion_draw_insidecolor = ui.new_color_picker("LUA", "B", "Hover Color", 252, 198, 3, 100)
+local onion_draw_color_custom = ui.new_checkbox("LUA", "B", "Custom Colors")
+local onion_colors = { ui.new_checkbox("LUA", "B", "Draw Color"), ui.new_color_picker("LUA", "B", "Draw Color", 3, 136, 252, 100), ui.new_checkbox("LUA", "B", "Hover Color"), ui.new_color_picker("LUA", "B", "Hover Color", 252, 198, 3, 100) }
 local onion_text_posname = ui.new_textbox("LUA", "B", "Position Name");
 
 local function pointInside(x1, x2, y1, y2, x3, y3)
     local sizeTable = { tonumber(x1), tonumber(x2), tonumber(x3), tonumber(y1), tonumber(y2), tonumber(y3) };
 
-    -- this is because I'm a retard and can't account for the map having negative and positive positions when I'm doing my point check.
     for i = 1, #sizeTable do
         if (sizeTable[i] > 0) then
             sizeTable[i] = sizeTable[i] + 100000
@@ -148,8 +145,13 @@ local isInside = false;
 local insideIndex;
 
 client.set_event_callback("paint", function()
-    if (ui.get(onion_enabled)) then
-        localPlayer = entity.get_local_player();  
+    localPlayer = entity.get_local_player();
+
+    for i = 1, #onion_colors do
+        ui.set_visible(onion_colors[i], ui.get(onion_draw_color_custom))
+    end
+
+    if (ui.get(onion_enabled) and localPlayer ~= nil) then
         playerX, playerY, playerZ = entity.get_origin(localPlayer)
         x, y = renderer.world_to_screen(playerX, playerY, playerZ)
         ceiling = playerZ + (100000 * client.trace_line(localPlayer, playerX, playerY, playerZ, playerX, playerY, playerZ + 100000));
@@ -201,9 +203,9 @@ client.set_event_callback("paint", function()
                 blX, blY = renderer.world_to_screen(locations[i][4][1], locations[i][3][2], locations[i][2])
                 brX, brY = renderer.world_to_screen(locations[i][4][1], locations[i][4][2], locations[i][2])
 
-                if (ui.get(onion_draw_insidecolor_enabled)) then
-                    renderer.triangle(tlX, tlY, brX, brY, blX, blY, ui.get(onion_draw_insidecolor))
-                    renderer.triangle(tlX, tlY, trX, trY, blX, blY, ui.get(onion_draw_insidecolor))
+                if (ui.get(onion_colors[3]) and ui.get(onion_draw_color_custom)) then
+                    renderer.triangle(tlX, tlY, brX, brY, blX, blY, ui.get(onion_colors[4]))
+                    renderer.triangle(tlX, tlY, trX, trY, blX, blY, ui.get(onion_colors[4]))
                 else
                     renderer.triangle(tlX, tlY, brX, brY, blX, blY, 255, 255, 255, 150)
                     renderer.triangle(tlX, tlY, trX, trY, blX, blY, 255, 255, 255, 150)
@@ -224,9 +226,9 @@ client.set_event_callback("paint", function()
                     blX, blY = renderer.world_to_screen(locations[i][4][1], locations[i][3][2], locations[i][2])
                     brX, brY = renderer.world_to_screen(locations[i][4][1], locations[i][4][2], locations[i][2])
 
-                    if (ui.get(onion_draw_color_enabled)) then
-                        renderer.triangle(tlX, tlY, brX, brY, blX, blY, ui.get(onion_draw_color))
-                        renderer.triangle(tlX, tlY, trX, trY, blX, blY, ui.get(onion_draw_color))
+                    if (ui.get(onion_colors[1]) and ui.get(onion_draw_color_custom)) then
+                        renderer.triangle(tlX, tlY, brX, brY, blX, blY, ui.get(onion_colors[2]))
+                        renderer.triangle(tlX, tlY, trX, trY, blX, blY, ui.get(onion_colors[3]))
                     else
                         renderer.triangle(tlX, tlY, brX, brY, blX, blY, 255, 255, 255, 150)
                         renderer.triangle(tlX, tlY, trX, trY, blX, blY, 255, 255, 255, 150)
