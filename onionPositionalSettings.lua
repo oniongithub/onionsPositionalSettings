@@ -140,6 +140,8 @@ loadLocations();
 local onion_button_log = ui.new_button("LUA", "B", "Log Location", logLocation)
 local onion_button_createpos = ui.new_button("LUA", "B", "Create Position", createLocation)
 local onion_button_updatepos = ui.new_button("LUA", "B", "Update Positions", loadLocations)
+local isInside = false;
+local insideIndex;
 
 client.set_event_callback("paint", function()
     if (ui.get(onion_enabled)) then
@@ -174,7 +176,12 @@ client.set_event_callback("paint", function()
         end
 
         for i = 1, #locations do
-            if (pointInside(locations[i][3][1], locations[i][4][1], locations[i][3][2], locations[i][4][2], playerX, playerY)) then
+            if (pointInside(locations[i][3][1], locations[i][4][1], locations[i][3][2], locations[i][4][2], playerX, playerY)) then                 
+                if (not isInside) then
+                    isInside = true;
+                    insideIndex = i;
+                end
+
                 if (dtEnabled) then
                     if (ui.get(onion_antirecharge_enabled)) then
                         if (hasShot) then
@@ -184,7 +191,7 @@ client.set_event_callback("paint", function()
                         end
                     end
                 end
-                
+                    
                 trX, trY = renderer.world_to_screen(locations[i][3][1], locations[i][3][2], locations[i][2])
                 tlX, tlY = renderer.world_to_screen(locations[i][3][1], locations[i][4][2], locations[i][2])
                 blX, blY = renderer.world_to_screen(locations[i][4][1], locations[i][3][2], locations[i][2])
@@ -198,10 +205,12 @@ client.set_event_callback("paint", function()
                     renderer.triangle(tlX, tlY, trX, trY, blX, blY, 255, 255, 255, 150)
                 end
             else
-                if (dtEnabled) then
-                    if (ui.get(onion_antirecharge_enabled)) then
-                        ui.set(doubleTap, true);
-                        hasShot = false;
+                if (not isInside or i == insideIndex) then
+                    if (dtEnabled) then
+                        if (ui.get(onion_antirecharge_enabled)) then
+                            ui.set(doubleTap, true);
+                            hasShot = false;
+                        end
                     end
                 end
 
