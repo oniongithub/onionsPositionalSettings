@@ -26,6 +26,7 @@ local onion_text_posname = ui.new_textbox("LUA", "B", "Position Name");
 local function pointInside(x1, x2, y1, y2, x3, y3)
     local sizeTable = { tonumber(x1), tonumber(x2), tonumber(x3), tonumber(y1), tonumber(y2), tonumber(y3) };
 
+    -- this is because I'm a retard and can't account for the map having negative and positive positions when I'm doing my point check.
     for i = 1, #sizeTable do
         if (sizeTable[i] > 0) then
             sizeTable[i] = sizeTable[i] + 100000
