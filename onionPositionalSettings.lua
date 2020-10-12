@@ -220,6 +220,8 @@ client.set_event_callback("paint", function()
                         if (ui.get(onion_antirecharge_enabled)) then
                             ui.set(doubleTap, true);
                             hasShot = false;
+                            isInside = false;
+                            insideIndex = nil;
                         end
                     end
                 end
