@@ -7,6 +7,7 @@ local locationCreation = { false, 0, 0, 0 };
 local locations = {};
 local doubleTap = ui.reference("RAGE", "Other", "Double Tap")
 local dtEnabled = false;
+local map = globals.mapname();
 if (ui.get(doubleTap)) then
     dtEnabled = true;
 end
@@ -67,26 +68,28 @@ local function splitStr(inputstr, sep)
 end
 
 local function loadLocations()
-    locations = {};
-    local loc = readfile("onionPositions.db")
+    if (localPlayer ~= nil) then
+        locations = {};
+        local loc = readfile("onionPositions_" .. map .. ".db")
 
-    if (loc ~= nil and loc ~= "") then
-        local lines = splitStr(loc, "\n")
+        if (loc ~= nil and loc ~= "") then
+            local lines = splitStr(loc, "\n")
 
-        for i = 1, #lines do
-            local splitLine = splitStr(lines[i], "|");
+            for i = 1, #lines do
+                local splitLine = splitStr(lines[i], "|");
 
-            if (#splitLine == 6) then
-                table.insert(locations, {splitLine[1], splitLine[2], {splitLine[3], splitLine[4]}, {splitLine[5], splitLine[6]}});
-            else
-                table.insert(locations, {'Name', splitLine[1], {splitLine[2], splitLine[3]}, {splitLine[4], splitLine[5]}});
+                if (#splitLine == 6) then
+                    table.insert(locations, {splitLine[1], splitLine[2], {splitLine[3], splitLine[4]}, {splitLine[5], splitLine[6]}});
+                else
+                    table.insert(locations, {'Name', splitLine[1], {splitLine[2], splitLine[3]}, {splitLine[4], splitLine[5]}});
+                end
             end
         end
     end
 end
 
 local function createLocation()
-    if (ui.get(onion_enabled)) then
+    if (ui.get(onion_enabled) and localPlayer ~= nil) then
         if (locationCreation[1]) then
             locationCreation[1] = false;
             
@@ -96,11 +99,11 @@ local function createLocation()
                 name = ui.get(onion_text_posname);
             end
 
-            local text = readfile("onionPositions.db");
+            local text = readfile("onionPositions_" .. map .. ".db");
             if (text ~= "" and text ~= nil) then
-                writefile("onionPositions.db", text .. "\n" .. name .. "|" .. locationCreation[4] .. "|" .. locationCreation[2] .. "|" .. locationCreation[3] .. "|" .. playerX .. "|" .. playerY);
+                writefile("onionPositions_" .. map .. ".db", text .. "\n" .. name .. "|" .. locationCreation[4] .. "|" .. locationCreation[2] .. "|" .. locationCreation[3] .. "|" .. playerX .. "|" .. playerY);
             else
-                writefile("onionPositions.db", name .. "|" .. locationCreation[4] .. "|" .. locationCreation[2] .. "|" .. locationCreation[3] .. "|" .. playerX .. "|" .. playerY)
+                writefile("onionPositions_" .. map .. ".db", name .. "|" .. locationCreation[4] .. "|" .. locationCreation[2] .. "|" .. locationCreation[3] .. "|" .. playerX .. "|" .. playerY)
             end
 
             loadLocations()
@@ -113,7 +116,7 @@ local function createLocation()
 end
 
 local function logLocation()
-    if (ui.get(onion_enabled)) then
+    if (ui.get(onion_enabled) and localPlayer ~= nil) then
         client.color_log(66, 164, 245, "playerX: " .. playerX .. " playerY: " .. playerY .. " playerZ: " .. playerZ .. " Player Ceiling: " .. ceiling .. "\n");
 
         for i = 0, 1 do
@@ -146,6 +149,7 @@ local insideIndex;
 
 client.set_event_callback("paint", function()
     localPlayer = entity.get_local_player();
+    map = globals.mapname();
 
     for i = 1, #onion_colors do
         ui.set_visible(onion_colors[i], ui.get(onion_draw_color_custom))
@@ -228,7 +232,7 @@ client.set_event_callback("paint", function()
 
                     if (ui.get(onion_colors[1]) and ui.get(onion_draw_color_custom)) then
                         renderer.triangle(tlX, tlY, brX, brY, blX, blY, ui.get(onion_colors[2]))
-                        renderer.triangle(tlX, tlY, trX, trY, blX, blY, ui.get(onion_colors[3]))
+                        renderer.triangle(tlX, tlY, trX, trY, blX, blY, ui.get(onion_colors[2]))
                     else
                         renderer.triangle(tlX, tlY, brX, brY, blX, blY, 255, 255, 255, 150)
                         renderer.triangle(tlX, tlY, trX, trY, blX, blY, 255, 255, 255, 150)
