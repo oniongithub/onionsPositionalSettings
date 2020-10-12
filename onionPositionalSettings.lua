@@ -24,29 +24,32 @@ local onion_draw_insidecolor = ui.new_color_picker("LUA", "B", "Hover Color", 25
 local onion_text_posname = ui.new_textbox("LUA", "B", "Position Name");
 
 local function pointInside(x1, x2, y1, y2, x3, y3)
-    x1 = math.abs(tonumber(x1))
-    x2 = math.abs(tonumber(x2))
-    x3 = math.abs(tonumber(x3))
-    y1 = math.abs(tonumber(y1))
-    y2 = math.abs(tonumber(y2))
-    y3 = math.abs(tonumber(y3))
+    local sizeTable = { tonumber(x1), tonumber(x2), tonumber(x3), tonumber(y1), tonumber(y2), tonumber(y3) };
 
-    if (x1 > x2) then
-        if (x3 > x1 or x3 < x2) then
+    for i = 1, #sizeTable do
+        if (sizeTable[i] > 0) then
+            sizeTable[i] = sizeTable[i] + 100000
+        end
+
+        sizeTable[i] = math.abs(sizeTable[i]);
+    end
+
+    if (sizeTable[1] > sizeTable[2]) then
+        if (sizeTable[3] > sizeTable[1] or sizeTable[3] < sizeTable[2]) then
             return false;
         end
     else
-        if (x3 < x1 or x3 > x2) then
+        if (sizeTable[3] < sizeTable[1] or sizeTable[3] > sizeTable[2]) then
             return false;
         end
     end
 
-    if (y1 > y2) then
-        if (y3 > y1 or y3 < y2) then
+    if (sizeTable[4] > sizeTable[5]) then
+        if (sizeTable[6] > sizeTable[4] or sizeTable[6] < sizeTable[5]) then
             return false;
         end
     else
-        if (y3 < y1 or y3 > y2) then
+        if (sizeTable[6] < sizeTable[4] or sizeTable[6] > sizeTable[5]) then
             return false;
         end
     end
