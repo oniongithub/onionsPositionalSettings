@@ -95,17 +95,19 @@ local function loadSettings(str)
 
         for i = 1, #lines do
             if (weaponUI[i] ~= nil and weaponUI[i][1] ~= nil) then
-                local one, two, three;
+                local one, two, three, four;
                 local settings = splitStr(lines[i], "|")
                 if (string.find(settings[1], "true")) then one = true; else one = false; end
                 if (string.find(settings[4], "true")) then two = true; else two = false; end
                 if (string.find(settings[5], "true")) then three = true; else three = false; end
+                if (string.find(settings[6], "true")) then four = true; else four = false; end
 
                 ui.set(weaponUI[i][1], one);
                 ui.set(weaponUI[i][2], tonumber(settings[2]));
                 ui.set(weaponUI[i][3], tonumber(settings[3]));
                 ui.set(weaponUI[i][4], two);
                 ui.set(weaponUI[i][5], three);
+                ui.set(weaponUI[i][6], four);
             end
         end
     end
@@ -233,15 +235,16 @@ local function saveSettings()
         local save;
 
         for i = 1, #weapons do
-            local one, two, three;
+            local one, two, three, four;
             if (ui.get(weaponUI[i][1])) then one = "true"; else one = "false"; end
             if (ui.get(weaponUI[i][4])) then two = "true"; else two = "false"; end
             if (ui.get(weaponUI[i][5])) then three = "true"; else three = "false"; end
+            if (ui.get(weaponUI[i][6])) then four = "true"; else four = "false"; end
 
             if (save == nil) then
-                save = one .. "|" .. ui.get(weaponUI[i][2]) .. "|" .. ui.get(weaponUI[i][3]) .. "|" .. two .. "|" .. three;
+                save = one .. "|" .. ui.get(weaponUI[i][2]) .. "|" .. ui.get(weaponUI[i][3]) .. "|" .. two .. "|" .. three .. "|" .. four;
             else
-                save = save .. "\n" .. one .. "|" .. ui.get(weaponUI[i][2]) .. "|" .. ui.get(weaponUI[i][3]) .. "|" .. two .. "|" .. three;
+                save = save .. "\n" .. one .. "|" .. ui.get(weaponUI[i][2]) .. "|" .. ui.get(weaponUI[i][3]) .. "|" .. two .. "|" .. three .. "|" .. four;
             end
         end
 
@@ -303,7 +306,7 @@ local onion_button_updatepos = ui.new_button("LUA", "B", "Update Settings", load
 local weaponLabel = ui.new_label("LUA", "B", "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
 local onion_button_savesettings = ui.new_button("LUA", "B", "Save Settings", saveSettings)
 for i = 1, #weapons do
-    table.insert(weaponUI, {ui.new_checkbox("LUA", "B", "Double Tap"), ui.new_slider("LUA", "B", "Minimum hit chance", 0, 100, 10), ui.new_slider("LUA", "B", "Minimum Damage", 0, 126, 10), ui.new_checkbox("LUA", "B", "Force Safe-Point on Limbs"), ui.new_checkbox("LUA", "B", "Prefer Safe-Point")})
+    table.insert(weaponUI, {ui.new_checkbox("LUA", "B", "Double Tap"), ui.new_slider("LUA", "B", "Minimum hit chance", 0, 100, 10), ui.new_slider("LUA", "B", "Minimum Damage", 0, 126, 10), ui.new_checkbox("LUA", "B", "Force Safe-Point on Limbs"), ui.new_checkbox("LUA", "B", "Prefer Safe-Point"), ui.new_checkbox("LUA", "B", "Override Aimbot")})
 end
 
 ui.new_label("LUA", "B", "-+-+-+-+ [ Onion's Position LUA ] +-+-+-+-")
@@ -376,14 +379,16 @@ client.set_event_callback("paint", function()
 
                 for i = 1, #weapons do
                     if (currentWeapon == weapons[i][1]) then
-                        if (not ui.get(onion_antirecharge_enabled)) then
-                            ui.set(guiReferences["dt"], ui.get(weaponUI[i][1]));
-                        end
+                        if (ui.get(weaponUI[i][6])) then
+                            if (not ui.get(onion_antirecharge_enabled)) then
+                                ui.set(guiReferences["dt"], ui.get(weaponUI[i][1]));
+                            end
 
-                        ui.set(guiReferences["hitchance"], ui.get(weaponUI[i][2]));
-                        ui.set(guiReferences["mindamage"], ui.get(weaponUI[i][3]));
-                        ui.set(guiReferences["limbsafe"], ui.get(weaponUI[i][4]));
-                        ui.set(guiReferences["prefersafe"], ui.get(weaponUI[i][5]));
+                            ui.set(guiReferences["hitchance"], ui.get(weaponUI[i][2]));
+                            ui.set(guiReferences["mindamage"], ui.get(weaponUI[i][3]));
+                            ui.set(guiReferences["limbsafe"], ui.get(weaponUI[i][4]));
+                            ui.set(guiReferences["prefersafe"], ui.get(weaponUI[i][5]));
+                        end
                     end
                 end
                 
