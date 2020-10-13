@@ -97,9 +97,9 @@ local function loadSettings(str)
             if (weaponUI[i] ~= nil and weaponUI[i][1] ~= nil) then
                 local one, two, three;
                 local settings = splitStr(lines[i], "|")
-                if (settings[2] == "true") then one = true; else one = false; end
-                if (settings[5] == "true") then two = true; else two = false; end
-                if (settings[6] == "true") then three = true; else three = false; end
+                if (string.find(settings[1], "true")) then one = true; else one = false; end
+                if (string.find(settings[4], "true")) then two = true; else two = false; end
+                if (string.find(settings[5], "true")) then three = true; else three = false; end
 
                 ui.set(weaponUI[i][1], one);
                 ui.set(weaponUI[i][2], tonumber(settings[2]));
