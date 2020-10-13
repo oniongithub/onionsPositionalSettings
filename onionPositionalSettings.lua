@@ -11,6 +11,9 @@ if (localPlayer ~= nil) then
     currentWeapon = entity.get_classname(entity.get_player_weapon(localPlayer));
 end
 local onion_location;
+local inside = false;
+local perLocationSettings = {};
+local insideName = "";
 guiReferences["dt"] = ui.reference("RAGE", "Other", "Double Tap");
 guiReferences["hitchance"] = ui.reference("RAGE", "Aimbot", "Minimum Hit Chance");
 guiReferences["mindamage"] = ui.reference("RAGE", "Aimbot", "Minimum Damage");
@@ -75,8 +78,10 @@ local function splitStr(inputstr, sep)
             sep = "%s"
     end
     local t={}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-            table.insert(t, str)
+    if (inputstr ~= nil) then
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                table.insert(t, str)
+        end
     end
     return t
 end
@@ -84,20 +89,49 @@ end
 local mapTable = splitStr(globals.mapname(), "/");
 local map = mapTable[#mapTable];
 
+local function loadSettings(str)
+    if (weaponUI ~= nil and str ~= nil) then
+        local lines = splitStr(str, "\n")
+
+        for i = 1, #lines do
+            if (weaponUI[i] ~= nil and weaponUI[i][1] ~= nil) then
+                local one, two, three;
+                local settings = splitStr(lines[i], "|")
+                if (settings[2] == "true") then one = true; else one = false; end
+                if (settings[5] == "true") then two = true; else two = false; end
+                if (settings[6] == "true") then three = true; else three = false; end
+
+                ui.set(weaponUI[i][1], one);
+                ui.set(weaponUI[i][2], tonumber(settings[2]));
+                ui.set(weaponUI[i][3], tonumber(settings[3]));
+                ui.set(weaponUI[i][4], two);
+                ui.set(weaponUI[i][5], three);
+            end
+        end
+    end
+end
+
 local function loadInformation()
     if (localPlayer ~= nil) then
         locations = {};
         names = {};
         
         local positions = readfile("onionPositions_" .. map .. ".db")
-        local settings = readfile("onionSettings.db")
+        
+        perLocationSettings = {};
+        local settingsRead = readfile("onionSettings.db")
+        local settingLines = splitStr(settingsRead, "\n")
 
-        if (settings ~= nil and settings ~= "") then
-            local lines = splitStr(settings, "\n")
+        for i = 1, #settingLines do
+            if (string.find(settingLines[i], "map: ")) then
+                table.insert(perLocationSettings, { settingLines[i + 1] .. "\n" .. settingLines[i + 2] .. "\n" .. settingLines[i + 3] .. "\n" .. settingLines[i + 4] .. "\n" .. settingLines[i + 5], string.gsub(settingLines[i], "map: ", "")})
+            end
+        end
 
-            for i = 1, #lines do
-                if (#lines == 5) then
-
+        if (#perLocationSettings ~= 0) then
+            for i = 1, #perLocationSettings do
+                if (string.find(perLocationSettings[i][2], insideName)) then
+                    loadSettings(perLocationSettings[i][1]);
                 end
             end
         end
@@ -124,7 +158,6 @@ local function deleteLocation()
     name = ui.get(onion_location);
     local locations = readfile("onionPositions_" .. map .. ".db")
     local endText;
-    client.color_log(255, 255, 255, name)
 
     if (locations ~= nil and locations ~= "") then
         local lines = splitStr(locations, "\n")
@@ -195,6 +228,68 @@ local function logLocation()
     end
 end
 
+local function saveSettings()
+    if (ui.get(onion_enabled) and inside) then
+        local save;
+
+        for i = 1, #weapons do
+            local one, two, three;
+            if (ui.get(weaponUI[i][1])) then one = "true"; else one = "false"; end
+            if (ui.get(weaponUI[i][4])) then two = "true"; else two = "false"; end
+            if (ui.get(weaponUI[i][5])) then three = "true"; else three = "false"; end
+
+            if (save == nil) then
+                save = one .. "|" .. ui.get(weaponUI[i][2]) .. "|" .. ui.get(weaponUI[i][3]) .. "|" .. two .. "|" .. three;
+            else
+                save = save .. "\n" .. one .. "|" .. ui.get(weaponUI[i][2]) .. "|" .. ui.get(weaponUI[i][3]) .. "|" .. two .. "|" .. three;
+            end
+        end
+
+        local text = readfile("onionSettings.db")
+        local lines = splitStr(text, "\n")
+        local endtext;
+        local contains = false;
+        local containIndex = 0;
+
+        for i = 1, #lines do
+            if (string.find(lines[i], insideName)) then
+                contains = true;
+                containIndex = i;
+            end
+        end
+
+        if (contains) then
+            for i = 1, 6 do
+                table.remove(lines, containIndex);
+            end
+        end
+
+        for i = 1, #lines do
+            if (endtext == nil or endtext == "") then
+                endtext = lines[i];
+            else
+                endtext = endtext .. "\n" .. lines[i];
+            end
+        end
+        
+        client.color_log(255, 255, 255, insideName)
+        if (endtext ~= nil) then
+            writefile("onionSettings.db", endtext)
+        end
+        client.color_log(255, 255, 255, "Mainframe 1/2")
+        local currentText = readfile("onionSettings.db");
+        if (currentText ~= nil and currentText ~= "") then
+            client.color_log(255, 255, 255, "Mainframe 1")
+            writefile("onionSettings.db", currentText .. "\nmap: " .. insideName .. "\n" .. save)
+        else
+            client.color_log(255, 255, 255, "Mainframe 2")
+            writefile("onionSettings.db", "map: " .. insideName .. "\n" .. save)
+        end
+    else
+        client.color_log(255, 255, 255, "Please step inside a location to save settings.")
+    end
+end
+
 loadInformation();
 if (names ~= nil and #names ~= 0) then
     onion_location = ui.new_combobox("LUA", "B", "Location", names)
@@ -204,12 +299,12 @@ local onion_button_createpos = ui.new_button("LUA", "B", "Create Position", crea
 if (names ~= nil and #names ~= 0) then
     local onion_button_deletepos = ui.new_button("LUA", "B", "Delete Position", deleteLocation)
 end
-local onion_button_updatepos = ui.new_button("LUA", "B", "Update Positions", loadInformation)
+local onion_button_updatepos = ui.new_button("LUA", "B", "Update Settings", loadInformation)
 local weaponLabel = ui.new_label("LUA", "B", "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
+local onion_button_savesettings = ui.new_button("LUA", "B", "Save Settings", saveSettings)
 for i = 1, #weapons do
     table.insert(weaponUI, {ui.new_checkbox("LUA", "B", "Double Tap"), ui.new_slider("LUA", "B", "Minimum hit chance", 0, 100, 10), ui.new_slider("LUA", "B", "Minimum Damage", 0, 126, 10), ui.new_checkbox("LUA", "B", "Force Safe-Point on Limbs"), ui.new_checkbox("LUA", "B", "Prefer Safe-Point")})
 end
-local weaponConfigs = { {weapons[1], weaponUI[1]}, {weapons[2], weaponUI[2]}, {weapons[3], weaponUI[3]}, {weapons[4], weaponUI[4]}, {weapons[5], weaponUI[5]} };
 
 ui.new_label("LUA", "B", "-+-+-+-+ [ Onion's Position LUA ] +-+-+-+-")
 local isInside = false;
@@ -269,9 +364,16 @@ client.set_event_callback("paint", function()
             renderer.line(x, y, testX, testY, 255, 255, 255, 255)
         end
 
+        inside = false;
+
         for i = 1, #locations do
             if (pointInside(locations[i][3][1], locations[i][4][1], locations[i][3][2], locations[i][4][2], playerX, playerY)) then                 
-                
+                inside = true;
+                if (insideName ~= locations[i][1]) then
+                    insideName = locations[i][1]
+                    loadInformation();
+                end
+
                 for i = 1, #weapons do
                     if (currentWeapon == weapons[i][1]) then
                         if (not ui.get(onion_antirecharge_enabled)) then
@@ -290,7 +392,7 @@ client.set_event_callback("paint", function()
                     insideIndex = i;
                 end
 
-                if (dtEnabled) then
+                if (dtEnabled and currentWeapon ~= "CWeaponAWP" and currentWeapon ~= "CWeaponSSG08") then
                     if (ui.get(onion_antirecharge_enabled)) then
                         if (hasShot) then
                             ui.set(guiReferences["dt"], false);
@@ -314,7 +416,7 @@ client.set_event_callback("paint", function()
                 end
             else
                 if (not isInside or i == insideIndex) then
-                    if (dtEnabled) then
+                    if (dtEnabled and currentWeapon ~= "CWeaponAWP" and currentWeapon ~= "CWeaponSSG08") then
                         if (ui.get(onion_antirecharge_enabled)) then
                             ui.set(guiReferences["dt"], true);
                             hasShot = false;
