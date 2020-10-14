@@ -310,8 +310,10 @@ if (names ~= nil and #names ~= 0) then
     local onion_button_deletepos = ui.new_button("LUA", "B", "Delete Position", deleteLocation)
 end
 local onion_button_updatepos = ui.new_button("LUA", "B", "Update Settings", loadInformation)
+local weaponLabel = ui.new_label("LUA", "B", "-+-+-+-+ [ Aim -  ] +-+-+-+-")
+
 if (currentWeapon ~= nil) then
-    local weaponLabel = ui.new_label("LUA", "B", "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
+    ui.set(weaponLabel, "LUA", "B", "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
 end
 local onion_button_savesettings = ui.new_button("LUA", "B", "Save Settings", saveSettings)
 for i = 1, #weapons do
