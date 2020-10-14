@@ -322,11 +322,12 @@ client.set_event_callback("paint", function()
         ui.set_visible(onion_colors[i], ui.get(onion_draw_color_custom))
     end
 
-    if (ui.get(onion_enabled) and localPlayer ~= nil) then
+    if (ui.get(onion_enabled) and localPlayer ~= nil and entity.is_alive(localPlayer)) then
         currentWeapon = entity.get_classname(entity.get_player_weapon(localPlayer))
         playerX, playerY, playerZ = entity.get_origin(localPlayer)
         x, y = renderer.world_to_screen(playerX, playerY, playerZ)
         ceiling = playerZ + (100000 * client.trace_line(localPlayer, playerX, playerY, playerZ, playerX, playerY, playerZ + 100000));
+
 
         ui.set(weaponLabel, "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
 
