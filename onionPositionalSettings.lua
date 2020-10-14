@@ -1,15 +1,22 @@
 local localPlayer = entity.get_local_player();  
-local playerX, playerY, playerZ = entity.get_origin(localPlayer)
+local playerX, playerY, playerZ, ceiling;
+
+if (localPlayer ~= nil) then
+    playerX, playerY, playerZ = entity.get_origin(localPlayer);
+    ceiling = playerZ + (100000 * client.trace_line(localPlayer, playerX, playerY, playerZ, playerX, playerY, playerZ + 100000));
+end
+
 local x, y = renderer.world_to_screen(playerX, playerY, playerZ)
-local ceiling = playerZ + (100000 * client.trace_line(localPlayer, playerX, playerY, playerZ, playerX, playerY, playerZ + 100000));
 local maxDistance = 250;
 local locationCreation = { false, 0, 0, 0 };
 local locations = {};
 local guiReferences = {};
 local currentWeapon;
+
 if (localPlayer ~= nil) then
     currentWeapon = entity.get_classname(entity.get_player_weapon(localPlayer));
 end
+
 local onion_location;
 local inside = false;
 local perLocationSettings = {};
@@ -303,7 +310,9 @@ if (names ~= nil and #names ~= 0) then
     local onion_button_deletepos = ui.new_button("LUA", "B", "Delete Position", deleteLocation)
 end
 local onion_button_updatepos = ui.new_button("LUA", "B", "Update Settings", loadInformation)
-local weaponLabel = ui.new_label("LUA", "B", "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
+if (currentWeapon ~= nil) then
+    local weaponLabel = ui.new_label("LUA", "B", "-+-+-+-+ [ Aim - " .. currentWeapon .. " ] +-+-+-+-")
+end
 local onion_button_savesettings = ui.new_button("LUA", "B", "Save Settings", saveSettings)
 for i = 1, #weapons do
     table.insert(weaponUI, {ui.new_checkbox("LUA", "B", "Double Tap"), ui.new_slider("LUA", "B", "Minimum hit chance", 0, 100, 10), ui.new_slider("LUA", "B", "Minimum Damage", 0, 126, 10), ui.new_checkbox("LUA", "B", "Force Safe-Point on Limbs"), ui.new_checkbox("LUA", "B", "Prefer Safe-Point"), ui.new_checkbox("LUA", "B", "Override Aimbot")})
