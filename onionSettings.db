@@ -1,0 +1,30 @@
+map: Stairs
+true|65|55|true|true|true
+false|75|35|false|true|true
+true|75|105|true|true|true
+true|50|33|false|true|true
+true|50|33|false|true|true
+map: Stairs
+true|65|55|true|true|true
+false|75|35|false|true|true
+true|75|105|true|true|true
+true|50|33|false|true|true
+true|50|33|false|true|true
+map: Cat One Way
+true|25|5|true|true|true
+false|50|35|false|false|true
+false|55|40|false|false|true
+true|30|10|false|false|true
+true|30|10|false|false|true
+map: Market ESP 1W
+true|25|5|true|true|true
+false|75|55|false|false|true
+false|75|55|false|true|true
+false|45|20|true|true|true
+false|45|20|true|true|true
+map: Watching Palace
+true|65|55|true|true|false
+false|75|35|false|true|false
+true|75|105|true|true|false
+true|70|35|false|true|true
+true|70|35|false|true|true
